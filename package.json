@@ -1,0 +1,25 @@
+{
+  "name": "battleship",
+  "version": "1.0.0",
+  "main": "battleship.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/henryr2003/battleship.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/henryr2003/battleship/issues"
+  },
+  "homepage": "https://github.com/henryr2003/battleship#readme",
+  "description": "",
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^6.0.1"
+  }
+}
