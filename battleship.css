@@ -1,0 +1,37 @@
+body{
+    padding: 0px;
+    margin: 0px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    height: 100vh;
+}
+.main{
+    /* border: 1px solid; */
+    width: 90vw;
+    height: 90vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+}
+
+#left_side, #right_side{
+    border: 1px solid;
+    height: 800px;
+    width: 800px;
+    display: grid;
+    grid-template-rows: repeat(10, 80px);
+    grid-template-columns: repeat(10,80px);
+}
+
+.gridBox{
+    border: 1px solid;
+    
+}
+
+.highlighted{
+    
+    border: 5px solid rgb(37, 98, 151)
+}

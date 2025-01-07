@@ -54,6 +54,7 @@ class Gameboard {
 
     }
 
+
     recieveAttack(x, y){
         this.attackList.push([x,y]);
         for(const ship of this.shipList) {
@@ -101,7 +102,18 @@ class Gameboard {
 
 }
 
-module.exports = {
-    Ship,
-    Gameboard,
-};
+class Player{
+    constructor(){
+        let gameboard = new Gameboard();
+        this.gameboard = gameboard;
+    }
+}
+
+// module.exports = {
+//     Ship,
+//     Gameboard,
+//     Player,
+// };
+
+
+export {Player,};
