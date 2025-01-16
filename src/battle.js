@@ -38,7 +38,7 @@ class Gameboard {
     constructor() {
         this.attackList = [];
         this.shipList = [];
-
+        
         let carrier = new Ship(1, 1, 5, 1);
         let battleship = new Ship(1, 2, 1, 5);
         let cruiser = new Ship(6, 5, 8, 5);
@@ -60,7 +60,7 @@ class Gameboard {
         for(const ship of this.shipList) {
             let coordinates = ship.coordinateArray();
             // console.log(coordinates);
-            console.log(`hitCounter: ${ship.getHitCounter()}`)
+            // console.log(`hitCounter: ${ship.getHitCounter()}`)
             if(coordinates.some(pair => pair[0] == x && pair[1] == y)){
                 ship.hit();
                 return true
@@ -91,8 +91,14 @@ class Gameboard {
 
 
     }
+
     getCoordinateList(){
-        return this.coordinateList;
+        let coordinateList = []
+        for(const ship of this.shipList){
+            // console.log(`ship.coordinateArray: ${ship.coordinateArray()}`);
+            coordinateList = [...coordinateList, ...ship.coordinateArray()]
+        }
+        return coordinateList;
     }
 
     getAttackList(){
