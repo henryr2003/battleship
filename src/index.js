@@ -87,6 +87,23 @@ renderGrid(leftSide,newPlayer, "left");
 let debug = document.createElement("div");
 rightSide.appendChild(debug);
 
+let restrictedSquares = [];
+makeRestrictedSquaresList(shipCoordinates);
+function makeRestrictedSquaresList(coordList){
+    
+    for(const pair of coordList){
+        let x = parseInt(pair[0]);
+        let y = parseInt(pair[1]);
+
+        let squareNum = (x-1)*10 + y;
+        restrictedSquares.push(squareNum);
+
+    }
+
+    console.log(restrictedSquares);
+
+    console.log()
+}
 function clearSquares(){
     let allSquares = document.querySelectorAll(".gridBox");
     allSquares.forEach((square) => {
@@ -98,17 +115,16 @@ function checkCollision(squareNum, horizontal){
     let square = document.getElementById(squareNum);
     
     if (horizontal){
+        console.log(`squareNum in collision: ${squareNum}`);
         for(let i = 0; i < currentSize; i++){
-            let tempSquare = document.getElementById(`square${squareNum+i}`);
-            let horizontal = tempSquare.getAttribute("horizontal");
-            let vertical = tempSquare.getAttribute("vertical");
-
-            if (checkPair(horizontal, vertical)){
+            console.log(`squareNum+i: ${squareNum+i}`);
+            console.log(`currentSize in collision: ${currentSize}`)
+            if(restrictedSquares.includes(squareNum+i)){
                 return true;
             }
         }
 
-        return falsei8jum8jmumu8m
+        return false
     }
 }
 function renderGrid(side, player, sideText){
@@ -128,7 +144,8 @@ function renderGrid(side, player, sideText){
 
         let horizontal = dragShip.getAttribute("horizontal");
 
-        let currentSize = parseInt(dragShip.getAttribute("size"));
+        currentSize = parseInt(dragShip.getAttribute("size"));
+
         debug.textContent = `size:${shipSize} horizontal: ${horizontal}`
 
 
@@ -189,13 +206,39 @@ function renderGrid(side, player, sideText){
 
             }
             else{
-                console.log(`currentSize: ${currentSize}`)
-                for(let i = 0; i < currentSize; i++){
-                    let square = document.getElementById(`square${parseInt(squareNum) + i }`);
-                    console.log(`squaresecondId: ${square.id}`);
-                    square.style.backgroundColor = "green";
+                console.log(`collision: ${checkCollision(squareNum, horizontal)}`)
+                if(!checkCollision(squareNum, horizontal)){
+                    console.log(`currentSize: ${currentSize}`)
+                    for(let i = 0; i < currentSize; i++){
+                        console.log(` squareNum added: square${parseInt(squareNum) + i }`)
+                        let square = document.getElementById(`square${parseInt(squareNum) + i }`);
+                        
+                
+                        
+                    
+                        square.style.backgroundColor = "green";
+                        
+                    
                 }
-                e.target.style.backgroundColor = "green";
+                // e.target.style.backgroundColor = "green";
+                }
+                else{
+                    for(let i = 0; i < currentSize; i++){
+
+                        if(!restrictedSquares.includes(squareNum+i)){
+                            let square = document.getElementById(`square${parseInt(squareNum) + i }`);
+                        
+                
+                        
+                    
+                            square.style.backgroundColor = "red";
+                        }     
+                                      
+                        
+                    
+                        }
+                }
+                
                 
             }
             
