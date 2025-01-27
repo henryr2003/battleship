@@ -1,5 +1,5 @@
 class Ship {
-    constructor(x1, y1, x2, y2, size) {
+    constructor(x1, y1, x2, y2) {
         this.hitCounter = 0;
         this.x1 = x1;
         this.x2 = x2;
@@ -41,13 +41,19 @@ class Gameboard {
         
         let carrier = new Ship(1, 1, 5, 1);
         let battleship = new Ship(1, 2, 1, 5);
-        let cruiser = new Ship(6, 5, 8, 5);
+        let destroyer = new Ship(6, 5, 8, 5);
         let submarine = new Ship(7, 8, 7, 10);
         let patrol = new Ship(1, 9, 1, 10);
 
+        this.carrier = carrier;
+        this.battleship = battleship;
+        this.destroyer = destroyer;
+        this.submarine = submarine;
+        this.patrol = patrol;
+
         this.shipList.push(carrier);
         this.shipList.push(battleship);
-        this.shipList.push(cruiser);
+        this.shipList.push(destroyer);
         this.shipList.push(submarine);
         this.shipList.push(patrol);
 
@@ -115,11 +121,4 @@ class Player{
     }
 }
 
-// module.exports = {
-//     Ship,
-//     Gameboard,
-//     Player,
-// };
-
-
-export {Player,};
+export {Player, Ship};

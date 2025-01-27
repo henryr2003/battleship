@@ -1,46 +1,24 @@
-import {Player} from "./battle.js"
+import {Player, Ship} from "./battle.js"
 document.addEventListener("DOMContentLoaded", () => {
-    // Your drag-and-drop logic here
 
-// console.log("testing");
 let newPlayer = new Player();
 
-newPlayer.gameboard.recieveAttack(1,1);
+
 let currentHighlight;
 let currentSize = 1;
 let currentDirection;
-// console.log(newPlayer.gameboard.getAttackList());
-
+let placeAllowed;
+let placeLocation;
 let shipCoordinates = newPlayer.gameboard.getCoordinateList();
-
-// console.log(`shipCoordinates: ${shipCoordinates}`);
-
-// console.log()
-
 
 const leftSide = document.getElementById("left_side");
 const rightSide = document.getElementById("right_side");
 
 let currentId;
 
-// for(const pair of shipCoordinates){
-//     console.log(`pair: ${pair}`);
-    
-    
-// }
-// let newShip = document.createElement("div");
-// newShip.style.backgroundColor = "black";
-// newShip.style.gridRow = `1 / 4`
-// leftSide.appendChild(newShip);
-
 addGridBoxes(leftSide, newPlayer, "left");
 
 function addGridBoxes(side, newPlayer, sideText){
-
-    // let shipCoordinates = newPlayer.gameboard.getCoordinateList();
-
-    // console.log(`shipCoordinates: ${shipCoordinates}`);
-
     
     for(let i = 1; i <= 10; i++){
         for(let j = 1; j <= 10; j++){
@@ -60,13 +38,13 @@ function addGridBoxes(side, newPlayer, sideText){
         }
     }
 }
+
+function fullyRenderSide(){
+
+}
 function checkPair(x,y){
     for(const pair of shipCoordinates){
-        // console.log(`pair: ${pair}`);
-        // console.log(`compare: ${[x,y]}`);
-        // console.log(`pair[1]: ${pair[1]}`)
         if(pair[0] == x && pair[1] == y){
-            // console.log("pair is true");
             return true;
         }
         
@@ -78,11 +56,6 @@ function mainMenu(){
     
 }
 renderGrid(leftSide,newPlayer, "left");
-
-// renderGrid(rightSide, newPlayer, "right");
-
-// addGridBoxes(rightSide, newPlayer, "right");
-
 
 let debug = document.createElement("div");
 rightSide.appendChild(debug);
@@ -100,9 +73,9 @@ function makeRestrictedSquaresList(coordList){
 
     }
 
-    console.log(restrictedSquares);
+    // console.log(restrictedSquares);
 
-    console.log()
+    // console.log()
 }
 function clearSquares(){
     let allSquares = document.querySelectorAll(".gridBox");
@@ -114,18 +87,29 @@ function clearSquares(){
 function checkCollision(squareNum, horizontal){
     let square = document.getElementById(squareNum);
     
-    if (horizontal){
-        console.log(`squareNum in collision: ${squareNum}`);
-        for(let i = 0; i < currentSize; i++){
-            console.log(`squareNum+i: ${squareNum+i}`);
-            console.log(`currentSize in collision: ${currentSize}`)
+    
+    console.log(`squareNum in collision: ${squareNum}`);
+    for(let i = 0; i < currentSize; i++){
+        // console.log(`squareNum+i: ${squareNum+i}`);
+        // console.log(`currentSize in collision: ${currentSize}`)
+
+        if (horizontal === "true"){
             if(restrictedSquares.includes(squareNum+i)){
                 return true;
             }
         }
-
-        return false
+        else{
+            if(restrictedSquares.includes(squareNum+i*10)){
+                return true;
+            }
+        }
+        
     }
+
+    return false
+    
+
+    
 }
 function renderGrid(side, player, sideText){
     const shipList = player.gameboard.shipList;
@@ -144,30 +128,19 @@ function renderGrid(side, player, sideText){
 
         let horizontal = dragShip.getAttribute("horizontal");
 
+        
         currentSize = parseInt(dragShip.getAttribute("size"));
 
         debug.textContent = `size:${shipSize} horizontal: ${horizontal}`
 
 
-        if(e.target.hasAttribute("size")){
-            // currentSize = e.target.getAttribute("size");
-            // currentDirection = e.target.getAttribute("horizontal");
-            // debug.textContent = `size: ${e.target.getAttribute("size")} dir: ${currentDirection}`
-            
-            
-        }
-        
-        // console.log(`horizontal: ${e.target.getAttribute("horizontal")}`);
-        // console.log(`vertical: ${e.target.getAttribute("vertical")}`);
         let previousSquare;
 
         if(currentHighlight){
             previousSquare = document.getElementById(currentHighlight);
-            // console.log(`previousSquare: ${previousSquare.id}`);
             if(e.target.id != previousSquare){
                 
                 clearSquares();
-                // previousSquare.style.backgroundColor = "white";
 
             }
         }
@@ -177,70 +150,113 @@ function renderGrid(side, player, sideText){
         if(e.target.id != "left_side" && !e.target.hasAttribute("size")){
             currentHighlight = e.target.id;
             let squareNum = parseInt(e.target.id.match(/\d+/)[0])
-            console.log(`e.target.id: ${e.target.id}`);
-            console.log(`squareId: ${squareNum}`);
-            console.log(`(squareNum % 10) + currentSize : ${((parseInt(squareNum) -1 )% 10) + parseInt(currentSize)}`)
-
+            // console.log(`e.target.id: ${e.target.id}`);
             
-            //horizontal checking
-            if(((parseInt(squareNum) -1 )% 10) + parseInt(currentSize) > 10){
-                console.log(`10 - squareNum % 10:${10 - squareNum % 10 + 1}`)
-                console.log(`parseInt(squareNum/10) + 10: ${parseInt(squareNum/10)*10 + 10}`);
 
-                for(let i = squareNum; i <= parseInt((squareNum-1)/10)*10 + 10; i++ ){
-                    console.log(`squareNum + i: ${parseInt(i) }`)
-                    let square = document.getElementById(`square${parseInt(i) }`);
-                    console.log(`squaresecondId: ${square.id}`);
-                    square.style.backgroundColor = "red";
+            //horizontal checking
+            
+            if(horizontal === "true"){
+                if(((parseInt(squareNum) -1 )% 10) + parseInt(currentSize) > 10){
+                
+                    for(let i = squareNum; i <= parseInt((squareNum-1)/10)*10 + 10; i++ ){
+                        let square = document.getElementById(`square${parseInt(i) }`);
+                        square.style.backgroundColor = "red";
+                        placeAllowed = false;
+                        placeLocation = squareNum;
+                    }
+                }
+                //no collision and no overflow
+                else{
+                    console.log(`collision: ${checkCollision(squareNum, horizontal)}`)
+                    if(!checkCollision(squareNum, horizontal)){
+                        for(let i = 0; i < currentSize; i++){
+                            let square = document.getElementById(`square${parseInt(squareNum) + i }`);
+                            
+                    
+                            
+                        
+                            square.style.backgroundColor = "green";
+                            placeAllowed = true;
+                            placeLocation = squareNum;
+                            
+                        
+                    }
+                    }
+
+                    //collision check horizontal
+                    else{
+                        for(let i = 0; i < currentSize; i++){
+    
+                            if(!restrictedSquares.includes(squareNum+i)){
+                                let square = document.getElementById(`square${parseInt(squareNum) + i }`);
+                                square.style.backgroundColor = "red";
+                                placeAllowed = false;
+                                placeLocation = squareNum;
+                            }     
+                                          
+                            
+                        
+                            }
+                    }
+                    
+                    
                 }
             }
 
             //vertical checking
-
-            
-
-
-
-            //check if colliding with ships
-            else if (!squareNum){
-
-            }
             else{
-                console.log(`collision: ${checkCollision(squareNum, horizontal)}`)
-                if(!checkCollision(squareNum, horizontal)){
-                    console.log(`currentSize: ${currentSize}`)
-                    for(let i = 0; i < currentSize; i++){
-                        console.log(` squareNum added: square${parseInt(squareNum) + i }`)
-                        let square = document.getElementById(`square${parseInt(squareNum) + i }`);
-                        
-                
-                        
-                    
-                        square.style.backgroundColor = "green";
-                        
-                    
-                }
-                // e.target.style.backgroundColor = "green";
-                }
-                else{
-                    for(let i = 0; i < currentSize; i++){
 
-                        if(!restrictedSquares.includes(squareNum+i)){
-                            let square = document.getElementById(`square${parseInt(squareNum) + i }`);
-                        
-                
-                        
+                //check if overflow vertically
+                if((squareNum-10) + currentSize*10 > 100){
+                    console.log(`squareNum + currentSize*10:${squareNum + currentSize*10}`)
                     
-                            square.style.backgroundColor = "red";
-                        }     
-                                      
-                        
+                    for(let i = squareNum; i <= 100; i+= 10 ){
+                        console.log(`squareNum + i: ${parseInt(i) }`)
+                        let square = document.getElementById(`square${parseInt(i) }`);
+                        console.log(`squaresecondId: ${square.id}`);
+                        square.style.backgroundColor = "red";
+                        placeAllowed = false;
+                        placeLocation = squareNum;
+                    }
+
                     
-                        }
                 }
-                
-                
+
+                //check for collision vertically
+                else{
+                    if(!checkCollision(squareNum, horizontal)){
+                        
+                        for(let i = 0; i < currentSize; i++){
+                            let square = document.getElementById(`square${parseInt(squareNum) + i*10 }`);
+                            
+                    
+                            
+                        
+                            square.style.backgroundColor = "green";
+                            
+                            placeAllowed = true;
+                            placeLocation = squareNum;
+                        }
+                    }
+
+                    else{
+                        for(let i = 0; i < currentSize; i++){
+                            
+                            if(!restrictedSquares.includes(squareNum+i*10)){
+                                let square = document.getElementById(`square${parseInt(squareNum) + i*10}`);
+                                square.style.backgroundColor = "red";
+                                placeLocation = squareNum;
+                                placeAllowed = false;
+                            }     
+                                          
+                            
+                        
+                            }
+                    }
+                }
             }
+
+
             
 
         }
@@ -254,25 +270,22 @@ function renderGrid(side, player, sideText){
         
     })
 
-
+    let shipCounter = 0;
     for(const ship of shipList){
         let coordinateArray = ship.coordinateArray();
         let coordLength = coordinateArray.length;
-
-        // console.log(coordinateArray);
-        // console.log(`coordinateArray[0][0]: ${coordinateArray[0][0]}`);
-        // console.log(`coordinateArray[1][0]: ${coordinateArray[1][0]}`);
-        // for(const pair of coordinateArray){
-       
-           
 
             let gridShip = document.createElement("div");
             gridShip.style.backgroundColor = colorList[counter];
             gridShip.style.border = "3px solid"
             gridShip.setAttribute("size", ship.getSize());
-            gridShip.id = `${shipNames[counter]}`;
+            gridShip.id = `${shipNames[shipCounter]}`;
+            shipCounter += 1;
+            gridShip.setAttribute("index", counter)
             gridShip.setAttribute("draggable", true);
             //horizontal direction
+            console.log(`coordinateArray[0][0]: ${coordinateArray[0][0]}`)
+            console.log(`coordinateArray[1][0]: ${coordinateArray[1][0]}`)
             if(coordinateArray[0][0] == coordinateArray[1][0]){
                 gridShip.setAttribute("horizontal", true);
                 
@@ -294,16 +307,48 @@ function renderGrid(side, player, sideText){
 
             gridShip.addEventListener("dragend", (e) => {
                 clearSquares();
+                console.log(`left at: ${e.target.id}`);
+                console.log(`lastLocation: ${placeLocation}`);
+                console.log(`allowed: ${placeAllowed}`)
+
+                if(placeAllowed){
+                    console.log("allowed true")
+                    let ship = document.getElementById(e.target.id);
+                    
+                    let currentSquare = document.getElementById(`square${placeLocation}`);
+                    let row = parseInt(currentSquare.getAttribute("horizontal"));
+                    let column = parseInt(currentSquare.getAttribute("vertical"));
+                    let horizontal = ship.getAttribute("horizontal");
+
+                    
+                    
+                    let otherShip;
+                    console.log("destroyer is the shit");
+                    if(horizontal == "true"){
+                        otherShip = new Ship(row,column,row,column + currentSize -1);
+                    }
+                    else{
+                        otherShip = new Ship(row,column,row + currentSize -1,column);
+                    }
+                    
+
+                    
+                    newPlayer.gameboard.shipList[parseInt(ship.getAttribute("index"))] = otherShip;
+                    leftSide.innerHTML = "";
+                    shipCoordinates = newPlayer.gameboard.getCoordinateList();
+                    restrictedSquares = [];
+                    makeRestrictedSquaresList(shipCoordinates);
+                    addGridBoxes(leftSide, newPlayer, "left");
+                    renderGrid(leftSide, newPlayer,"left")
+                    
+                        
+                        
+                    
+                }
             })
 
             side.appendChild(gridShip);
 
-
-            // let gridBox = document.querySelector(`[horizontal="${pair[0]}"][vertical="${pair[1]}"][side="${sideText}"]`);
-            // gridBox.style.backgroundColor = colorList[counter]
-            // gridBox.classList.add("highlighted")
-            // console.log(gridBox);
-        
             counter += 1;
     }
 }
