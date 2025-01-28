@@ -1,34 +1,43 @@
 import {Player, Ship} from "./battle.js"
 document.addEventListener("DOMContentLoaded", () => {
 
-let newPlayer = new Player();
-
+let playerOne = new Player();
+let playerTwo = new Player();
 
 let currentHighlight;
 let currentSize = 1;
 let currentDirection;
 let placeAllowed;
 let placeLocation;
-let shipCoordinates = newPlayer.gameboard.getCoordinateList();
+
 
 const leftSide = document.getElementById("left_side");
 const rightSide = document.getElementById("right_side");
 
+let restrictedSquares = [];
+
+fullyRenderSide(leftSide, playerOne);
+fullyRenderSide(rightSide, playerTwo);
+
 let currentId;
 
-addGridBoxes(leftSide, newPlayer, "left");
 
-function addGridBoxes(side, newPlayer, sideText){
+function addGridBoxes(side,coords){
     
     for(let i = 1; i <= 10; i++){
         for(let j = 1; j <= 10; j++){
-            if(checkPair(i,j) == false){
+            if(checkPair(i,j,coords) == false){
                 let gridBox = document.createElement("div");
                 gridBox.classList.add("gridBox");
                 gridBox.setAttribute("horizontal", `${i}`);
                 gridBox.setAttribute("vertical", `${j}`);
-                gridBox.setAttribute("side", sideText);
-                gridBox.id = `square${(i-1)* 10 + (j)}`
+                if(side.id == "left_side"){
+                    gridBox.id = `Lsquare${(i-1)* 10 + (j)}`
+                }
+                else{
+                        gridBox.id = `Rsquare${(i-1)* 10 + (j)}`
+                }
+                
                 gridBox.vertical = j;
             
                 side.appendChild(gridBox);
@@ -39,10 +48,19 @@ function addGridBoxes(side, newPlayer, sideText){
     }
 }
 
-function fullyRenderSide(){
+function fullyRenderSide(side, player){
+    side.innerHTML = "";
+    let shipCoordinates = player.gameboard.getCoordinateList();
+    
 
+    restrictedSquares = [];
+    makeRestrictedSquaresList(shipCoordinates);
+    addGridBoxes(side,shipCoordinates)
+    renderGrid(side, player)
 }
-function checkPair(x,y){
+
+
+function checkPair(x,y, shipCoordinates){
     for(const pair of shipCoordinates){
         if(pair[0] == x && pair[1] == y){
             return true;
@@ -55,13 +73,12 @@ function checkPair(x,y){
 function mainMenu(){
     
 }
-renderGrid(leftSide,newPlayer, "left");
+// renderGrid(leftSide,newPlayer, "left");
 
-let debug = document.createElement("div");
-rightSide.appendChild(debug);
+// let debug = document.createElement("div");
+// rightSide.appendChild(debug);
 
-let restrictedSquares = [];
-makeRestrictedSquaresList(shipCoordinates);
+
 function makeRestrictedSquaresList(coordList){
     
     for(const pair of coordList){
@@ -111,14 +128,21 @@ function checkCollision(squareNum, horizontal){
 
     
 }
-function renderGrid(side, player, sideText){
+function renderGrid(side, player){
     const shipList = player.gameboard.shipList;
     let counter = 0;
     let colorList = ["gray", "blue", "orange", "red", "yellow"];
     let shipNames = ["carrier", "battleship", "destroyer", "submarine" ,"patrol"]
     
-
+    let sideText;
+    if(side.id == "left_side"){
+        sideText = "L";
+    }
+    else{
+        sideText = "R"
+    }
     side.addEventListener("dragover", (e) => {
+        
         e.preventDefault(); // Allow drop
         
         
@@ -131,7 +155,6 @@ function renderGrid(side, player, sideText){
         
         currentSize = parseInt(dragShip.getAttribute("size"));
 
-        debug.textContent = `size:${shipSize} horizontal: ${horizontal}`
 
 
         let previousSquare;
@@ -147,10 +170,18 @@ function renderGrid(side, player, sideText){
         
         
         let targetId = e.target.id;
-        if(e.target.id != "left_side" && !e.target.hasAttribute("size")){
+
+        console.log(`dragShip.id: ${dragShip.id} e.target.id[0]${e.target.id[0]}`);
+        if (dragShip.id[0] != e.target.id[0]) {
+            placeAllowed = false;
+            return;
+             // Skip processing for elements not within this side
+        }
+
+        if((side.contains(e.target)) && !e.target.hasAttribute("size")){
             currentHighlight = e.target.id;
             let squareNum = parseInt(e.target.id.match(/\d+/)[0])
-            // console.log(`e.target.id: ${e.target.id}`);
+            console.log(`e.target.id: ${e.target.id}`);
             
 
             //horizontal checking
@@ -159,7 +190,8 @@ function renderGrid(side, player, sideText){
                 if(((parseInt(squareNum) -1 )% 10) + parseInt(currentSize) > 10){
                 
                     for(let i = squareNum; i <= parseInt((squareNum-1)/10)*10 + 10; i++ ){
-                        let square = document.getElementById(`square${parseInt(i) }`);
+                        
+                        let square = document.getElementById(`${sideText}square${parseInt(i) }`);
                         square.style.backgroundColor = "red";
                         placeAllowed = false;
                         placeLocation = squareNum;
@@ -170,7 +202,7 @@ function renderGrid(side, player, sideText){
                     console.log(`collision: ${checkCollision(squareNum, horizontal)}`)
                     if(!checkCollision(squareNum, horizontal)){
                         for(let i = 0; i < currentSize; i++){
-                            let square = document.getElementById(`square${parseInt(squareNum) + i }`);
+                            let square = document.getElementById(`${sideText}square${parseInt(squareNum) + i }`);
                             
                     
                             
@@ -188,7 +220,7 @@ function renderGrid(side, player, sideText){
                         for(let i = 0; i < currentSize; i++){
     
                             if(!restrictedSquares.includes(squareNum+i)){
-                                let square = document.getElementById(`square${parseInt(squareNum) + i }`);
+                                let square = document.getElementById(`${sideText}square${parseInt(squareNum) + i }`);
                                 square.style.backgroundColor = "red";
                                 placeAllowed = false;
                                 placeLocation = squareNum;
@@ -212,7 +244,7 @@ function renderGrid(side, player, sideText){
                     
                     for(let i = squareNum; i <= 100; i+= 10 ){
                         console.log(`squareNum + i: ${parseInt(i) }`)
-                        let square = document.getElementById(`square${parseInt(i) }`);
+                        let square = document.getElementById(`${sideText}square${parseInt(i) }`);
                         console.log(`squaresecondId: ${square.id}`);
                         square.style.backgroundColor = "red";
                         placeAllowed = false;
@@ -227,7 +259,7 @@ function renderGrid(side, player, sideText){
                     if(!checkCollision(squareNum, horizontal)){
                         
                         for(let i = 0; i < currentSize; i++){
-                            let square = document.getElementById(`square${parseInt(squareNum) + i*10 }`);
+                            let square = document.getElementById(`${sideText}square${parseInt(squareNum) + i*10 }`);
                             
                     
                             
@@ -243,7 +275,7 @@ function renderGrid(side, player, sideText){
                         for(let i = 0; i < currentSize; i++){
                             
                             if(!restrictedSquares.includes(squareNum+i*10)){
-                                let square = document.getElementById(`square${parseInt(squareNum) + i*10}`);
+                                let square = document.getElementById(`${sideText}square${parseInt(squareNum) + i*10}`);
                                 square.style.backgroundColor = "red";
                                 placeLocation = squareNum;
                                 placeAllowed = false;
@@ -274,18 +306,17 @@ function renderGrid(side, player, sideText){
     for(const ship of shipList){
         let coordinateArray = ship.coordinateArray();
         let coordLength = coordinateArray.length;
-
+        
             let gridShip = document.createElement("div");
             gridShip.style.backgroundColor = colorList[counter];
             gridShip.style.border = "3px solid"
             gridShip.setAttribute("size", ship.getSize());
-            gridShip.id = `${shipNames[shipCounter]}`;
+            gridShip.id = `${sideText+ shipNames[shipCounter]}`;
             shipCounter += 1;
             gridShip.setAttribute("index", counter)
             gridShip.setAttribute("draggable", true);
             //horizontal direction
-            console.log(`coordinateArray[0][0]: ${coordinateArray[0][0]}`)
-            console.log(`coordinateArray[1][0]: ${coordinateArray[1][0]}`)
+        
             if(coordinateArray[0][0] == coordinateArray[1][0]){
                 gridShip.setAttribute("horizontal", true);
                 
@@ -299,12 +330,152 @@ function renderGrid(side, player, sideText){
                 gridShip.style.gridColumn = `${coordinateArray[0][1]} / ${coordinateArray[0][1]}`;
                 
             }
-            
+
+            //click to flip direction
+            gridShip.addEventListener("click", (e) => {
+                let size = parseInt(gridShip.getAttribute("size"))
+                let gridShipSquares = [];
+                for(const pair of coordinateArray){
+                    let x = parseInt(pair[0]);
+                    let y = parseInt(pair[1]);
+
+                    gridShipSquares.push((x-1)*10 + y );
+
+                }
+                console.log(`Restricted Squares: ${restrictedSquares}`)
+                console.log(`gridShipSquares: ${gridShipSquares}`)
+                console.log(`coordinateArray: ${coordinateArray}`)
+                
+                
+                let shipHorizontal = gridShip.getAttribute("horizontal");
+
+                //flip to horizontal
+                if(shipHorizontal == "false"){
+                    console.log("vertical");
+                    for(let i = 0; i < size; i++){
+                        
+                        let x = parseInt(coordinateArray[i][0]);
+                        let y = parseInt(coordinateArray[i][1]);
+                        let currentNum = (x-1) * 10 + y;
+                        let workingNum;
+                        console.log(`currentNum: ${currentNum}`)
+                        console.log(`y + size - 1: ${y + size - 1}`)
+                        let collision = false;
+
+                        //check if can flip to right
+                        if(y + size - 1 <= 10){
+                            console.log("no overflow to the right")
+                            for(let j = 0; j < size; j++){
+                                if(!gridShipSquares.includes(currentNum + j)){
+                                    if(restrictedSquares.includes(currentNum + j)){
+                                        collision = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            if(!collision){
+                                let otherShip = new Ship(x,y,x,y+size-1);
+                                player.gameboard.shipList[parseInt(gridShip.getAttribute("index"))] = otherShip;
+                        
+                                fullyRenderSide(side,player);
+                                console.log("got to the end")
+                                break;
+                            }
+                        }
+
+                        //check left 
+                        else if(y - (size - 1) > 0){
+                            console.log("no overflow to the left")
+                            for(let j = 0; j < size; j++){
+                                if(!gridShipSquares.includes(currentNum - j)){
+                                    if(restrictedSquares.includes(currentNum - j)){
+                                        collision = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            if(!collision){
+                                let otherShip = new Ship(x,y - size+1,x,y);
+                                player.gameboard.shipList[parseInt(gridShip.getAttribute("index"))] = otherShip;
+                        
+                                fullyRenderSide(side,player);
+                                console.log("got to the end")
+                                break;
+                            }
+                        }
+                          
+                    }
+                }
+
+                //flip to vertical
+                else{
+                    console.log("horizontal")
+                    for(let i = 0; i < size; i++){
+                        
+                        let x = parseInt(coordinateArray[i][0]);
+                        let y = parseInt(coordinateArray[i][1]);
+                        let currentNum = (x-1) * 10 + y;
+                        let workingNum;
+                        console.log(`currentNum: ${currentNum}`)
+                        console.log(`x - size: ${x - size}`)
+                        let collision = false;
+
+                        //check if can flip up
+                        if(x - size >= 0){
+                            console.log("no overflow up")
+                            for(let j = 0; j < size; j++){
+                                console.log(`currentNum + j*10: ${currentNum + j*10}`)
+                                if(!gridShipSquares.includes(currentNum - j*10)){
+                                    if(restrictedSquares.includes(currentNum - j*10)){
+                                        collision = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            if(!collision){
+                                let otherShip = new Ship(x - size +1,y,x,y);
+                                player.gameboard.shipList[parseInt(gridShip.getAttribute("index"))] = otherShip;
+                        
+                                fullyRenderSide(side,player);
+                                console.log("got to the end")
+                                break;
+                            }
+                        }
+
+                        //check if can flip down
+                        else if(x + size <= 10){
+                            console.log("no overflow to the down")
+                            for(let j = 0; j < size; j++){
+                                if(!gridShipSquares.includes(currentNum + j*10)){
+                                    if(restrictedSquares.includes(currentNum + j*10)){
+                                        collision = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            if(!collision){
+                                let otherShip = new Ship(x,y,x+size-1,y);
+                                player.gameboard.shipList[parseInt(gridShip.getAttribute("index"))] = otherShip;
+                        
+                                fullyRenderSide(side,player);
+                                console.log("got to the end")
+                                break;
+                            }
+                        }
+                          
+                    }
+                }
+            })
             gridShip.addEventListener("dragstart", (e) => {
                 currentId = e.target.id;
                 
             })
 
+            
             gridShip.addEventListener("dragend", (e) => {
                 clearSquares();
                 console.log(`left at: ${e.target.id}`);
@@ -315,7 +486,7 @@ function renderGrid(side, player, sideText){
                     console.log("allowed true")
                     let ship = document.getElementById(e.target.id);
                     
-                    let currentSquare = document.getElementById(`square${placeLocation}`);
+                    let currentSquare = document.getElementById(`${sideText}square${placeLocation}`);
                     let row = parseInt(currentSquare.getAttribute("horizontal"));
                     let column = parseInt(currentSquare.getAttribute("vertical"));
                     let horizontal = ship.getAttribute("horizontal");
@@ -333,13 +504,9 @@ function renderGrid(side, player, sideText){
                     
 
                     
-                    newPlayer.gameboard.shipList[parseInt(ship.getAttribute("index"))] = otherShip;
-                    leftSide.innerHTML = "";
-                    shipCoordinates = newPlayer.gameboard.getCoordinateList();
-                    restrictedSquares = [];
-                    makeRestrictedSquaresList(shipCoordinates);
-                    addGridBoxes(leftSide, newPlayer, "left");
-                    renderGrid(leftSide, newPlayer,"left")
+                    player.gameboard.shipList[parseInt(ship.getAttribute("index"))] = otherShip;
+                    
+                    fullyRenderSide(side,player);
                     
                         
                         
