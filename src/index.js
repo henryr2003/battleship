@@ -1,4 +1,5 @@
 import {Player, Ship} from "./battle.js"
+import "./battleship.css";
 document.addEventListener("DOMContentLoaded", () => {
 
 let playerOne = new Player();
