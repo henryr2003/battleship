@@ -6,16 +6,45 @@
     <title>Battleship</title>
     <link rel="stylesheet" href="battleship.css">
 </head>
-<body>
-    <div class="main">
-        <div id="left_side">
+<body id="body">
 
-        </div>
+    <div id="announcement">
 
-        <div id="right_side">
-
-        </div>
     </div>
+    <div class="main">
+        
+        <div class="left_container">
+
+            <h1 id="playerText1"> Player 1</h1>
+            <div id="left_side">
+
+            </div>
+
+            <button id="left_button">
+                Ready
+            </button>
+        </div>
+        
+        <div class="right_container">
+            <h1 id="playerText2"> Player 2</h1>
+            <div id="right_side">
+
+            </div>
+
+            <button id="right_button">
+                Ready
+            </button>
+        </div>
+        
+
+
+    </div>
+
+    <button id="start_button">
+        Start Game
+    </button>
+
+    <h5> *Player vs. Player Only*</h5>
 
 </body>
 <script src="src/index.js" type="module" >

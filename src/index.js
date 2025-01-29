@@ -9,12 +9,14 @@ let currentSize = 1;
 let currentDirection;
 let placeAllowed;
 let placeLocation;
-
+let shipNames = ["Carrier", "Battleship", "Destroyer", "Submarine" ,"Patrol"]
 
 const leftSide = document.getElementById("left_side");
 const rightSide = document.getElementById("right_side");
+let announcement = document.getElementById("announcement");
 
-let restrictedSquares = [];
+announcement.textContent = "Arrange your ships!"
+
 
 fullyRenderSide(leftSide, playerOne);
 fullyRenderSide(rightSide, playerTwo);
@@ -53,10 +55,9 @@ function fullyRenderSide(side, player){
     let shipCoordinates = player.gameboard.getCoordinateList();
     
 
-    restrictedSquares = [];
-    makeRestrictedSquaresList(shipCoordinates);
+    let restrictedSquares = makeRestrictedSquaresList(shipCoordinates);
     addGridBoxes(side,shipCoordinates)
-    renderGrid(side, player)
+    renderGrid(side, player, restrictedSquares)
 }
 
 
@@ -70,17 +71,9 @@ function checkPair(x,y, shipCoordinates){
     return false;
 }
 
-function mainMenu(){
-    
-}
-// renderGrid(leftSide,newPlayer, "left");
-
-// let debug = document.createElement("div");
-// rightSide.appendChild(debug);
-
-
 function makeRestrictedSquaresList(coordList){
-    
+
+    let restrictedSquares = [];
     for(const pair of coordList){
         let x = parseInt(pair[0]);
         let y = parseInt(pair[1]);
@@ -89,6 +82,7 @@ function makeRestrictedSquaresList(coordList){
         restrictedSquares.push(squareNum);
 
     }
+    return restrictedSquares;
 
     // console.log(restrictedSquares);
 
@@ -101,7 +95,7 @@ function clearSquares(){
     })
 }
 
-function checkCollision(squareNum, horizontal){
+function checkCollision(squareNum, horizontal, restrictedSquares){
     let square = document.getElementById(squareNum);
     
     
@@ -128,11 +122,11 @@ function checkCollision(squareNum, horizontal){
 
     
 }
-function renderGrid(side, player){
+function renderGrid(side, player, restrictedSquares){
     const shipList = player.gameboard.shipList;
     let counter = 0;
     let colorList = ["gray", "blue", "orange", "red", "yellow"];
-    let shipNames = ["carrier", "battleship", "destroyer", "submarine" ,"patrol"]
+    
     
     let sideText;
     if(side.id == "left_side"){
@@ -199,8 +193,8 @@ function renderGrid(side, player){
                 }
                 //no collision and no overflow
                 else{
-                    console.log(`collision: ${checkCollision(squareNum, horizontal)}`)
-                    if(!checkCollision(squareNum, horizontal)){
+                    console.log(`collision: ${checkCollision(squareNum, horizontal, restrictedSquares)}`)
+                    if(!checkCollision(squareNum, horizontal, restrictedSquares)){
                         for(let i = 0; i < currentSize; i++){
                             let square = document.getElementById(`${sideText}square${parseInt(squareNum) + i }`);
                             
@@ -256,7 +250,7 @@ function renderGrid(side, player){
 
                 //check for collision vertically
                 else{
-                    if(!checkCollision(squareNum, horizontal)){
+                    if(!checkCollision(squareNum, horizontal, restrictedSquares)){
                         
                         for(let i = 0; i < currentSize; i++){
                             let square = document.getElementById(`${sideText}square${parseInt(squareNum) + i*10 }`);
@@ -494,7 +488,7 @@ function renderGrid(side, player){
                     
                     
                     let otherShip;
-                    console.log("destroyer is the shit");
+        
                     if(horizontal == "true"){
                         otherShip = new Ship(row,column,row,column + currentSize -1);
                     }
@@ -520,4 +514,229 @@ function renderGrid(side, player){
     }
 }
 
+let leftButton = document.getElementById("left_button");
+let rightButton = document.getElementById("right_button");
+
+let leftReady = false;
+let rightReady = false;
+
+let startButton = document.getElementById("start_button");
+
+
+
+leftButton.addEventListener("click", () =>{
+    if(!leftReady){
+        leftSide.innerHTML = "";
+        leftSide.style.backgroundColor = "gray";
+        leftButton.style.backgroundColor = "gray";
+        leftReady = !leftReady;
+    }
+
+    else{
+        leftSide.style.backgroundColor = "transparent";
+        leftButton.style.backgroundColor = "aqua";
+        leftReady = !leftReady;
+        fullyRenderSide(leftSide, playerOne)
+    }
+
+    if(leftReady && rightReady){
+        startButton.style.display = "inline"
+    }
+    else{
+        startButton.style.display = "none"
+    }
+})
+
+rightButton.addEventListener("click", () =>{
+    if(!rightReady){
+        rightSide.innerHTML = "";
+        rightSide.style.backgroundColor = "gray";
+        rightButton.style.backgroundColor = "gray";
+        rightReady = !rightReady;
+    }
+
+    else{
+        rightSide.style.backgroundColor = "transparent"
+        rightButton.style.backgroundColor = "aqua";
+        rightReady = !rightReady;
+        fullyRenderSide(rightSide, playerTwo)
+    }
+
+    if(leftReady && rightReady){
+        startButton.style.display = "inline"
+    }
+    else{
+        startButton.style.display = "none"
+    }
+})
+
+
+startButton.addEventListener("click", () => {
+    announcement.textContent = "";
+    const newLeft = leftSide.cloneNode(true);
+    leftSide.replaceWith(newLeft);
+
+    const newRight = rightSide.cloneNode(true);
+    rightSide.replaceWith(newRight);
+    newLeft.innerHTML = "";
+    newRight.innerHTML = "";
+
+    newLeft.style.backgroundColor = "transparent";
+    newRight.style.backgroundColor = "transparent";
+
+    leftButton.style.display = "none";
+    rightButton.style.display = "none";
+    startButton.style.display = "none";
+
+
+    addGridBoxes(newLeft, []);
+    addGridBoxes(newRight, []);
+
+
+    let leftTurn = true;
+    let rightTurn = false;
+
+    let playerText1 = document.getElementById("playerText1");
+    let playerText2 = document.getElementById("playerText2");
+
+    playerText1.classList.add("turn");
+
+
+
+    newLeft.addEventListener("click", (e) => {
+        if (rightTurn && e.target.classList.contains("gridBox")){
+            e.preventDefault();
+            
+            let x = parseInt(e.target.getAttribute("horizontal"));
+            let y = parseInt(e.target.getAttribute("vertical"));
+            let attackList = playerOne.gameboard.attackList;
+            if(!checkPair(x,y,attackList)){
+        
+                leftTurn = !leftTurn;
+                rightTurn = !rightTurn;
+                
+                playerText2.classList.remove("turn");
+                playerText1.classList.add("turn");
+                let shipSunk;
+                
+                if(playerOne.gameboard.recieveAttack(x,y)){
+                    e.target.style.color = "red";
+                    e.target.style.borderColor = "black"
+                    
+                    for(const ship of playerOne.gameboard.shipList){
+                        let shipCoords = ship.coordinateArray();
+                        for(const pair of shipCoords){
+                            if(parseInt(pair[0]) == x && parseInt(pair[1]) == y){
+                                shipSunk = ship.isSunk();
+                            }
+                        }
+                        console.log(shipCoords);
+                    }
+                }
+
+                if(shipSunk){
+                    announcement.innerHTML = "Ship Has Been Sunk!"
+                    shipSunk = !shipSunk;
+                }
+
+                else{
+                    announcement.innerHTML = "";
+                }
+
+
+                e.target.innerHTML = "X";
+
+                if(playerOne.gameboard.allSink()){
+                    endGame("Player 2");
+                }
+                console.log(e.target.getAttribute("horizontal"));
+                console.log(e.target.getAttribute("vertical"));
+            }
+            
+        }
+        
+    })
+    
+    newRight.addEventListener("click", (e) => {
+        if (leftTurn && e.target.classList.contains("gridBox")){
+            e.preventDefault();
+
+            
+            let x = parseInt(e.target.getAttribute("horizontal"));
+            let y = parseInt(e.target.getAttribute("vertical"));
+            let attackList = playerTwo.gameboard.attackList;
+            if(!checkPair(x,y,attackList)){
+        
+                leftTurn = !leftTurn;
+                rightTurn = !rightTurn;
+
+                playerText1.classList.remove("turn");
+                playerText2.classList.add("turn");
+                
+                let shipSunk;
+                
+                if(playerTwo.gameboard.recieveAttack(x,y)){
+                    e.target.style.color = "red";
+                    e.target.style.borderColor = "black"
+                    
+                    for(const ship of playerTwo.gameboard.shipList){
+                        let shipCoords = ship.coordinateArray();
+                        for(const pair of shipCoords){
+                            if(parseInt(pair[0]) == x && parseInt(pair[1]) == y){
+                                shipSunk = ship.isSunk();
+                            }
+                        }
+                        console.log(shipCoords);
+                    }
+                }
+
+                if(shipSunk){
+                    announcement.innerHTML = "Ship Has Been Sunk!"
+                    shipSunk = !shipSunk;
+                }
+
+                else{
+                    announcement.innerHTML = "";
+                }
+
+
+                e.target.innerHTML = "X";
+
+                if(playerTwo.gameboard.allSink()){
+                    endGame("Player 1");
+                }
+                console.log(e.target.getAttribute("horizontal"));
+                console.log(e.target.getAttribute("vertical"));
+            }
+            
+        }
+        
+    })
+})
+
+function endGame(player){
+
+    let screen = document.createElement("div");
+    screen.classList.add("backScreen");
+
+    let screenContent = document.createElement("div");
+
+    screenContent.classList.add("end_screen");
+
+    let text = document.createElement("h1");
+
+    text.textContent = `${player} Won!`
+    let button =  document.createElement("button");
+    button.textContent = "Restart"
+    button.classList.add("end_button")
+    let body = document.getElementById("body");
+
+    screenContent.appendChild(text);
+    screenContent.appendChild(button);
+    screen.appendChild(screenContent);
+    body.appendChild(screen);
+    button.addEventListener("click", () => {
+        location.reload();
+    })
+}
 });

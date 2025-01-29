@@ -76,7 +76,7 @@ class Gameboard {
 
             return false
     }
-
+ 
     allSink(){
         let counter = 0;
         for(const ship of this.shipList){
