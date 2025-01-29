@@ -1,10 +1,9 @@
-// webpack.config.js
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
   mode: "development",
-  entry: "./src/index.js",
+  entry: path.resolve(__dirname, "src/index.js"), // ✅ Ensure absolute path
   output: {
     filename: "main.js",
     path: path.resolve(__dirname, "dist"),
@@ -16,7 +15,8 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: "./src/template.html",
+      template: path.resolve(__dirname, "src/template.html"), // ✅ Ensure correct path
+      inject: "body", // ✅ Ensures script is included correctly
     }),
   ],
   module: {
